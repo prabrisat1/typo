@@ -11,6 +11,24 @@ class Admin::ContentController < Admin::BaseController
     render :inline => "<%= raw auto_complete_result @items, 'name' %>"
   end
 
+  def merge
+    
+    unless current_user.admin?
+      flash[:notice] = "You're not allowed to perform MERGE action"
+      redirect_to "/admin/content/edit/#{params[:id]}"
+      return
+    end
+  
+    @article = Article.find_by_id(params[:id])
+    if (@article.merge_with(params[:merge_with]))
+      flash[:notice] = "Articles were succesfully merged."
+    else
+      flash[:error] = "Failed to merge articles. Check if an article with that ID exists."
+    end
+    
+    redirect_to "/admin/content/edit/#{params[:id]}"
+  end
+
   def index
     @search = params[:search] ? params[:search] : {}
     
@@ -140,6 +158,9 @@ class Admin::ContentController < Admin::BaseController
   def real_action_for(action); { 'add' => :<<, 'remove' => :delete}[action]; end
 
   def new_or_edit
+
+    @allow_merge = (current_user.admin? and params[:action] == 'edit')
+
     id = params[:id]
     id = params[:article][:id] if params[:article] && params[:article][:id]
     @article = Article.get_or_build_article(id)
