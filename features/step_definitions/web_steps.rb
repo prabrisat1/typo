@@ -41,6 +41,39 @@ Given /^the blog is set up$/ do
                 :profile_id => 1,
                 :name => 'admin',
                 :state => 'active'})
+
+  User.create!({:id => 2,
+                :login => 'user',
+                :password => 'user1',
+                :email => 'user1@snow.com',
+                :profile_id => 2,
+                :name => 'user',
+                :state => 'active'})
+
+  Article.create!({:id => 3,
+                 :type => 'Article',
+                 :title => 'Hello everyone',
+                 :author => 'writer',
+                 :body => 'Welcome everyone. This is my first article on this blog.'})
+
+    Article.create!({:id => 4,
+                 :type => 'Article',
+                 :title => 'Hi fellows',
+                 :author => 'user',
+                 :body => 'I just wanted to say hi. :)'})
+
+end
+
+And /^I am logged into the admin panel as blog publisher$/ do
+  visit '/accounts/login'
+  fill_in 'user_login', :with => 'user'
+  fill_in 'user_password', :with => 'user1'
+  click_button 'Login'
+  if page.respond_to? :should
+    page.should have_content('Login successful')
+  else
+    assert page.has_content?('Login successful')
+  end
 end
 
 And /^I am logged into the admin panel$/ do
